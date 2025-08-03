@@ -4,3 +4,13 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+git2 = "0.18"  # Git 操作库
+chrono = { version = "0.4", features = ["serde"] }  # 日期时间处理
+clap = { version = "4.0", features = ["derive"] }  # 命令行解析
+indicatif = "0.17"  # 进度条和spinner
+tabled = "0.10"  # 美观的表格输出
+anyhow = "1.0"  # 错误处理
+rayon = "1.8"  # 并行处理
+serde = { version = "1.0", features = ["derive"] }  # 序列化
+serde_json = "1.0"  # JSON 输出
+walkdir = "2.4"
