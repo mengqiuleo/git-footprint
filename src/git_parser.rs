@@ -1,6 +1,7 @@
-use git2::{Repository, Sort};
+use git2::{Repository, BranchType, Sort};
 use chrono::{NaiveDate, DateTime, Utc, TimeZone};
 use anyhow::Result;
+use std::collections::HashSet;
 
 #[derive(Debug, Clone)]
 pub struct CommitInfo {
@@ -11,11 +12,26 @@ pub struct CommitInfo {
 pub fn parse_git_logs(path: &std::path::Path, email: &str, since: Option<NaiveDate>, until: Option<NaiveDate>) -> Result<Vec<CommitInfo>> {
     let repo = Repository::open(path)?;
     let mut revwalk = repo.revwalk()?;
-    revwalk.push_head()?;
+
+
+    for branch in repo.branches(Some(BranchType::Local))? {
+        let (branch, _) = branch?;
+        if let Some(oid) = branch.get().target() {
+            revwalk.push(oid)?;
+        }
+    }
+
     revwalk.set_sorting(Sort::TIME)?;
 
+    let mut seen = HashSet::new();
     let mut commits = Vec::new();
+
     for oid in revwalk.flatten() {
+        if seen.contains(&oid) {
+            continue;
+        }
+        seen.insert(oid);
+
         if let Ok(commit) = repo.find_commit(oid) {
             if let Some(author_email) = commit.author().email() {
                 if author_email != email {

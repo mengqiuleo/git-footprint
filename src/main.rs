@@ -16,10 +16,17 @@ fn main() -> Result<()> {
     let args = CliArgs::parse();
     let repos = scan_git_repos(&args.path)?;
     let mut all_commits = Vec::new();
-
+    
     for repo in &repos {
-        let commits = parse_git_logs(repo, &args.email, args.since, args.until)?;
-        all_commits.push((repo.clone(), commits));
+        match parse_git_logs(repo, &args.email, args.since, args.until) {
+            Ok(commits) => {
+                all_commits.push((repo.clone(), commits));
+            }
+            Err(e) => {
+                eprintln!("⚠️  跳过仓库 {:?}，解析失败: {}", repo, e);
+                continue;
+            }
+        }
     }
 
     let analysis = analyze(&all_commits);
