@@ -85,4 +85,23 @@ pub fn print_report(r: &AnalysisResult) {
             bar
         );
     }
+
+
+    // 语言统计
+    println!("\n{}", style("代码语言分布:").bold());
+
+    let total_lines: usize = r.languages.values().sum();
+    let mut lang_vec: Vec<_> = r.languages.iter().collect();
+    lang_vec.sort_by(|a, b| b.1.cmp(a.1)); // 按代码量排序
+
+    for (lang, lines) in lang_vec.iter().take(10) {
+        let percentage = (**lines as f64 / total_lines as f64) * 100.0;
+        let bar_width = (percentage * 2.0) as usize;
+        println!(
+            "{:>6.1}% {:<15} {}",
+            percentage,
+            style(lang).cyan(),
+            style("█".repeat(bar_width)).green()
+        );
+    }
 }
