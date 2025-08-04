@@ -14,11 +14,12 @@ use formatter::print_report;
 
 fn main() -> Result<()> {
     let args = CliArgs::parse();
+    let (since, until) = args.get_date_range()?;
     let repos = scan_git_repos(&args.path)?;
     let mut all_commits = Vec::new();
     
     for repo in &repos {
-        match parse_git_logs(repo, &args.email, args.since, args.until) {
+        match parse_git_logs(repo, &args.email, Some(since), Some(until)) {
             Ok(commits) => {
                 all_commits.push((repo.clone(), commits));
             }
