@@ -53,6 +53,10 @@ pub fn parse_git_logs(path: &std::path::Path, email: &str, since: Option<NaiveDa
                 }
             }
 
+            let str =  commit.message().unwrap_or_default().to_string();
+
+            println!("commit time: {commit_time}, commit_message: { }", str);
+
             commits.push(CommitInfo {
                 time: commit_time,
                 message: commit.message().unwrap_or_default().to_string(),

@@ -393,6 +393,7 @@ dependencies = [
  "anyhow",
  "chrono",
  "clap",
+ "console",
  "crossterm",
  "git2",
  "indicatif",

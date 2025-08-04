@@ -1,4 +1,7 @@
 use crate::analyzer::AnalysisResult;
+use console::{style, Emoji};
+use indicatif::{ProgressBar, ProgressStyle};
+
 use std::io::{stdout};
 // use crossterm::{terminal, ExecutableCommand};
 use ratatui::{
@@ -64,8 +67,22 @@ pub fn print_report(r: &AnalysisResult) {
     }
 
     println!("\n按小时分布的提交数量:");
+
+    let max_count = *r.commits_per_hour.iter().max().unwrap_or(&1);
+    let max_bar_width = 50;
+
     for (hour, count) in r.commits_per_hour.iter().enumerate() {
-        let bar = "█".repeat(*count / 2);
-        println!("{:02}:00 - {:>3} {}", hour, count, bar);
+        let width = if count > &0 {
+            (count * max_bar_width) / max_count
+        } else {
+            0
+        };
+        let bar = style("█".repeat(width)).green();
+        println!(
+            "{:02}:00 - {:>3} {}",
+            style(hour).bold(),
+            style(count).yellow(),
+            bar
+        );
     }
 }

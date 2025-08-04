@@ -1,5 +1,6 @@
 use crate::git_parser::CommitInfo;
 use chrono::Timelike;
+use chrono::{Local};
 
 pub struct AnalysisResult {
     pub total_commits: usize,
@@ -16,7 +17,9 @@ pub fn analyze(data: &Vec<(std::path::PathBuf, Vec<CommitInfo>)>) -> AnalysisRes
         total += commits.len();
         per_repo.push((repo.to_string_lossy().to_string(), commits.len()));
         for commit in commits {
-            per_hour[commit.time.hour() as usize] += 1;
+            // 将UTC时间转换为本地时间
+            let local_time = commit.time.with_timezone(&Local);
+            per_hour[local_time.hour() as usize] += 1;
         }
     }
 
