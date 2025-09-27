@@ -1,15 +1,22 @@
-use git2::{Repository, BranchType, Sort};
-use chrono::{NaiveDate, DateTime, Utc, TimeZone};
+use git2::{Repository, BranchType, Sort, Commit};
+use chrono::{NaiveDate, DateTime, Utc, TimeZone, Local};
 use anyhow::Result;
 use std::collections::HashSet;
+use std::path::{PathBuf};
 
 #[derive(Debug, Clone)]
 pub struct CommitInfo {
-    pub time: DateTime<Utc>,
+    pub time: NaiveDate,
     pub message: String,
 }
 
-pub fn parse_git_logs(path: &std::path::Path, email: &str, since: Option<NaiveDate>, until: Option<NaiveDate>) -> Result<Vec<CommitInfo>> {
+fn get_commit_local_date(commit: &Commit) -> NaiveDate  {
+    let git_commit_time = Utc.timestamp_opt(commit.time().seconds(), 0).single().unwrap();
+
+    git_commit_time.with_timezone(&Local).date_naive()
+}
+
+pub fn parse_git_logs(path: &PathBuf, email: &str, since: NaiveDate, until: NaiveDate) -> Result<Vec<CommitInfo>> {
     let repo = Repository::open(path)?;
     let mut revwalk = repo.revwalk()?;
 
@@ -33,24 +40,13 @@ pub fn parse_git_logs(path: &std::path::Path, email: &str, since: Option<NaiveDa
         seen.insert(oid);
 
         if let Ok(commit) = repo.find_commit(oid) {
-            if let Some(author_email) = commit.author().email() {
-                if author_email != email {
-                    continue;
-                }
-            } else {
+            if !commit.author().email().map_or(false, |author_email| author_email == email) {
                 continue;
             }
 
-            let commit_time = Utc.timestamp_opt(commit.time().seconds(), 0).single().unwrap();
-            if let Some(since) = since {
-                if commit_time.date_naive() < since {
-                    continue;
-                }
-            }
-            if let Some(until) = until {
-                if commit_time.date_naive() > until {
-                    continue;
-                }
+            let commit_time = get_commit_local_date(&commit);
+            if commit_time < since || commit_time > until {
+                continue;
             }
 
             commits.push(CommitInfo {

@@ -19,12 +19,12 @@ fn main() -> Result<()> {
     let mut all_commits = Vec::new();
     
     for repo in &repos {
-        match parse_git_logs(repo, &args.email, Some(since), Some(until)) {
+        match parse_git_logs(repo, &args.email, since, until) {
             Ok(commits) => {
                 all_commits.push((repo.clone(), commits));
             }
             Err(e) => {
-                eprintln!("⚠️  跳过仓库 {:?}，解析失败: {}", repo, e);
+                eprintln!("warning 跳过仓库 {:?}，解析失败: {}", repo, e);
                 continue;
             }
         }
