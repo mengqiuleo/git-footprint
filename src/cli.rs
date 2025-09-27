@@ -15,12 +15,12 @@ pub struct CliArgs {
     #[arg(short, long, default_value = ".")]
     pub path: String,
 
-    /// Start date (YYYY-MM-DD), defaults to first day of current year, supported formats are YYYY-MM-DD, YYYY/MM/DD, YYYY.MM.DD
-    #[arg(short = 's', long = "start", value_parser = parse_naive_date)]
+    /// Start date, defaults to first day of current year, supported formats are YYYY-MM-DD, YYYY/MM/DD, YYYY.MM.DD
+    #[arg(long = "start", value_parser = parse_naive_date)]
     pub start_date: Option<NaiveDate>,
 
-    /// End date (YYYY-MM-DD), defaults to last day of current year
-    #[arg(short = 'e', long = "end", value_parser = parse_naive_date)]
+    /// End date, defaults to last day of current year, supported formats are YYYY-MM-DD, YYYY/MM/DD, YYYY.MM.DD
+    #[arg(long = "end", value_parser = parse_naive_date)]
     pub end_date: Option<NaiveDate>,
 }
 
