@@ -7,7 +7,6 @@ use std::path::{PathBuf};
 #[derive(Debug, Clone)]
 pub struct CommitInfo {
     pub time: DateTime<Local>,
-    pub message: String,
 }
 
 fn get_commit_local_time(commit: &Commit) -> DateTime<Local>  {
@@ -52,7 +51,6 @@ pub fn parse_git_logs(path: &PathBuf, email: &str, since: NaiveDate, until: Naiv
 
             commits.push(CommitInfo {
                 time: commit_time,
-                message: commit.message().unwrap_or_default().to_string(),
             });
         }
     }

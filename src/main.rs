@@ -33,7 +33,7 @@ fn main() -> Result<()> {
     }
 
     let analysis = analyze(&all_commits);
-    print_report(&analysis);
+    print_report(&analysis, since, until);
 
     Ok(())
 }
