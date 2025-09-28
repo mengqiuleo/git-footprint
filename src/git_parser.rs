@@ -6,14 +6,14 @@ use std::path::{PathBuf};
 
 #[derive(Debug, Clone)]
 pub struct CommitInfo {
-    pub time: NaiveDate,
+    pub time: DateTime<Local>,
     pub message: String,
 }
 
-fn get_commit_local_date(commit: &Commit) -> NaiveDate  {
+fn get_commit_local_time(commit: &Commit) -> DateTime<Local>  {
     let git_commit_time = Utc.timestamp_opt(commit.time().seconds(), 0).single().unwrap();
 
-    git_commit_time.with_timezone(&Local).date_naive()
+    git_commit_time.with_timezone(&Local)
 }
 
 pub fn parse_git_logs(path: &PathBuf, email: &str, since: NaiveDate, until: NaiveDate) -> Result<Vec<CommitInfo>> {
@@ -44,8 +44,9 @@ pub fn parse_git_logs(path: &PathBuf, email: &str, since: NaiveDate, until: Naiv
                 continue;
             }
 
-            let commit_time = get_commit_local_date(&commit);
-            if commit_time < since || commit_time > until {
+            let commit_time = get_commit_local_time(&commit);
+            let commit_date = commit_time.date_naive();
+            if commit_date < since || commit_date > until {
                 continue;
             }
 

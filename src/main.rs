@@ -3,6 +3,8 @@ mod scanner;
 mod git_parser;
 mod analyzer;
 mod formatter;
+mod contribution_calendar;
+
 
 use anyhow::Result;
 use cli::CliArgs;

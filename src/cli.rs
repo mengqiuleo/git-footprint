@@ -15,47 +15,21 @@ pub struct CliArgs {
     #[arg(short, long, default_value = ".")]
     pub path: String,
 
-    /// Start date, defaults to first day of current year, supported formats are YYYY-MM-DD, YYYY/MM/DD, YYYY.MM.DD
-    #[arg(long = "start", value_parser = parse_naive_date)]
-    pub start_date: Option<NaiveDate>,
-
-    /// End date, defaults to last day of current year, supported formats are YYYY-MM-DD, YYYY/MM/DD, YYYY.MM.DD
-    #[arg(long = "end", value_parser = parse_naive_date)]
-    pub end_date: Option<NaiveDate>,
-}
-
-
-fn parse_naive_date(s: &str) -> Result<NaiveDate, String> {
-    let formats = [
-        "%Y-%m-%d",    // 2024-01-01
-        "%Y/%m/%d",    // 2024/01/01
-        "%Y.%m.%d",    // 2024.01.01
-    ];
-
-    for fmt in formats.iter() {
-        if let Ok(date) = NaiveDate::parse_from_str(s, fmt) {
-            return Ok(date);
-        }
-    }
-
-    Err(format!("无法解析日期: '{}'，支持的格式: YYYY-MM-DD, YYYY/MM/DD, YYYY.MM.DD", s))
+    /// Year to analyze (e.g., 2024), defaults to current year
+    #[arg(short, long)]
+    pub year: Option<i32>,
 }
 
 impl CliArgs {
-    pub fn get_date_range(&self) -> Result<(NaiveDate, NaiveDate)>  {
+    pub fn get_date_range(&self) -> Result<(NaiveDate, NaiveDate)> {
         let current_year = Local::now().year();
+        let year = self.year.unwrap_or(current_year);
 
-        let since = self.start_date.unwrap_or_else(|| {
-            NaiveDate::from_ymd_opt(current_year, 1, 1).unwrap()
-        });
+        let since = NaiveDate::from_ymd_opt(year, 1, 1)
+            .ok_or_else(|| anyhow!("无效的年份: {}", year))?;
 
-        let until = self.end_date.unwrap_or_else(|| {
-            NaiveDate::from_ymd_opt(current_year, 12, 31).unwrap()
-        });
-
-        if since > until {
-            return Err(anyhow!("结束日期不能早于开始日期"));
-        }
+        let until = NaiveDate::from_ymd_opt(year, 12, 31)
+            .ok_or_else(|| anyhow!("无效的年份: {}", year))?;
 
         Ok((since, until))
     }

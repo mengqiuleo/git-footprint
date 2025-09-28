@@ -1,51 +1,77 @@
 use std::collections::HashMap;
-use crate::git_parser::CommitInfo;
-use chrono::Timelike;
-use chrono::{Local};
+use std::path::{PathBuf};
+use chrono::{NaiveDate, Timelike};
 use std::path::Path;
-use tokei::{Config, Language, Languages};
+use tokei::{Config, Languages};
+use crate::git_parser::CommitInfo;
+
+#[derive(Debug)]
+pub struct RepoStat {
+    pub name: String,
+    pub commit_count: usize,
+}
+
+#[derive(Debug)]
+pub struct LanguageStat {
+    pub name: String,
+    pub lines: usize,
+}
 
 #[derive(Debug)]
 pub struct AnalysisResult {
     pub total_commits: usize,
-    pub per_repo: Vec<(String, usize)>,
+    pub per_repo: Vec<RepoStat>,
     pub commits_per_hour: [usize; 24],
-    pub languages: HashMap<String, usize>,
+    pub commits_per_day: HashMap<NaiveDate, usize>,
+    pub languages: Vec<LanguageStat>,
 }
 
-pub fn analyze(data: &Vec<(std::path::PathBuf, Vec<CommitInfo>)>) -> AnalysisResult {
+pub fn analyze(data: &Vec<(PathBuf, Vec<CommitInfo>)>) -> AnalysisResult {
     let mut total = 0;
     let mut per_repo = Vec::new();
     let mut per_hour = [0usize; 24];
-    let mut languages = HashMap::new();
+    let mut per_day: HashMap<NaiveDate, usize> = HashMap::new();
+    let mut languages: Vec<LanguageStat> = Vec::new();
 
     for (repo, commits) in data {
         total += commits.len();
-        per_repo.push((repo.to_string_lossy().to_string(), commits.len()));
+        per_repo.push(RepoStat {
+            name: repo.to_string_lossy().to_string(),
+            commit_count: commits.len(),
+        });
         for commit in commits {
-            let local_time = commit.time.with_timezone(&Local);
-            per_hour[local_time.hour() as usize] += 1;
+            let hour = commit.time.hour() as usize;
+            per_hour[hour] += 1;
+
+            let date = commit.time.date_naive();
+            per_day.entry(date)
+                .and_modify(|count| *count += 1)
+                .or_insert(1);
         }
 
-        // 分析仓库语言
-        let repo_langs = analyze_languages(&repo);
-        for (lang, lines) in repo_langs {
-            *languages.entry(lang).or_insert(0) += lines;
+        for lang_stat in analyze_languages(repo) {
+            if let Some(existing) = languages.iter_mut().find(|l| l.name == lang_stat.name) {
+                existing.lines += lang_stat.lines;
+            } else {
+                languages.push(lang_stat);
+            }
         }
     }
 
-    per_repo.sort_by(|a, b| b.1.cmp(&a.1));
+    per_repo.sort_by(|a, b| b.commit_count.cmp(&a.commit_count));
+    languages.sort_by(|a, b| b.lines.cmp(&a.lines));
 
     AnalysisResult {
         total_commits: total,
         per_repo,
         commits_per_hour: per_hour,
+        commits_per_day: per_day,
         languages
     }
 }
 
 
-fn analyze_languages(repo_path: &Path) -> HashMap<String, usize> {
+fn analyze_languages(repo_path: &Path) -> Vec<LanguageStat> {
     let mut languages = Languages::new();
     let config = Config::default();
 
@@ -53,7 +79,10 @@ fn analyze_languages(repo_path: &Path) -> HashMap<String, usize> {
 
     languages
         .into_iter()
-        .filter(|(lang, stats)| stats.lines() > 0)
-        .map(|(lang, stats)| (lang.name().to_string(), stats.lines()))
+        .filter(|(_lang, stats)| stats.lines() > 0)
+        .map(|(lang, stats)| LanguageStat {
+            name: lang.name().to_string(),
+            lines: stats.lines(),
+        })
         .collect()
 }
