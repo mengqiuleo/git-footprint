@@ -31,4 +31,4 @@ git-footprint --email your@email.com --path ~/your/code/dir --year 2025
 
 
 ## License
-- License: [MIT]() 
+- License: [MIT](https://github.com/mengqiuleo/git-footprint/blob/main/LICENSE) 
