@@ -2,6 +2,13 @@
 name = "git-stats"
 version = "0.1.0"
 edition = "2024"
+description = "A CLI tool for counting git repository contribution"
+license = "MIT"
+authors = ["mengqiuleo <1003346758@qq.com>"]
+repository = "https://github.com/mengqiuleo/git-stats"
+homepage = "https://github.com/mengqiuleo/git-stats"
+keywords = ["github", "git", "contributions"]
+readme = "README.md"
 
 [dependencies]
 git2 = "0.18"
