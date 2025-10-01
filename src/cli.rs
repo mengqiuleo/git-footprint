@@ -4,7 +4,7 @@ use chrono::{Local, Datelike, NaiveDate};
 use anyhow::Result;
 
 #[derive(Parser, Debug)]
-#[command(name = "git-stats")]
+#[command(name = "git-footprint")]
 #[command(about, version)]
 pub struct CliArgs {
     /// Git user email to filter commits

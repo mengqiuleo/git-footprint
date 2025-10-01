@@ -481,7 +481,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "git-stats"
+name = "git-footprint"
 version = "0.1.0"
 dependencies = [
  "anyhow",
