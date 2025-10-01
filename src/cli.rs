@@ -26,10 +26,10 @@ impl CliArgs {
         let year = self.year.unwrap_or(current_year);
 
         let since = NaiveDate::from_ymd_opt(year, 1, 1)
-            .ok_or_else(|| anyhow!("无效的年份: {}", year))?;
+            .ok_or_else(|| anyhow!("Invalid year: {}", year))?;
 
         let until = NaiveDate::from_ymd_opt(year, 12, 31)
-            .ok_or_else(|| anyhow!("无效的年份: {}", year))?;
+            .ok_or_else(|| anyhow!("Invalid year: {}", year))?;
 
         Ok((since, until))
     }

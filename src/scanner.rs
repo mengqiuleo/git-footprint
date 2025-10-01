@@ -4,7 +4,7 @@ use anyhow::Result;
 
 pub fn scan_git_repos(root: &str) -> Result<Vec<PathBuf>> {
     let mut repos = Vec::new();
-    println!(" ☕ 正在扫描目录: {root}");
+    println!(" ☕ Scanning directory: {root}");
 
     for entry in WalkDir::new(root).into_iter().filter_map(|e| e.ok()) {
         if entry.file_type().is_dir() && entry.file_name() == ".git" {
@@ -14,6 +14,6 @@ pub fn scan_git_repos(root: &str) -> Result<Vec<PathBuf>> {
         }
     }
 
-    println!("扫描完成，共发现 {} 个 Git 仓库", repos.len());
+    println!("Scan completed, found {} Git repositories", repos.len());
     Ok(repos)
 }

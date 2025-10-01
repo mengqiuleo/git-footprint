@@ -26,7 +26,7 @@ fn main() -> Result<()> {
                 all_commits.push((repo.clone(), commits));
             }
             Err(e) => {
-                eprintln!("warning 跳过仓库 {:?}，解析失败: {}", repo, e);
+                eprintln!("warning: repository {:?} skipped due to parse failure: {}", repo, e);
                 continue;
             }
         }
